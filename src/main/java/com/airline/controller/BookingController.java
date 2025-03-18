@@ -23,6 +23,10 @@ public class BookingController {
         }
         return instance;
     }
+    public List<Booking> getAllBookings() {
+        // Return a copy of all bookings
+        return new ArrayList<>(bookings);
+    }
     
     public Booking createBooking(Customer customer, Flight flight) {
         Booking booking = new Booking();
@@ -68,7 +72,19 @@ public class BookingController {
     public boolean cancelBooking(String bookingId) {
         Booking booking = getBookingDetails(bookingId);
         if (booking != null) {
-            return booking.cancelBooking();
+            boolean cancelled = booking.cancelBooking();
+            
+            if (cancelled && booking.getPaymentStatus() == PaymentStatus.COMPLETED) {
+                // Process refund
+                PaymentController paymentController = PaymentController.getInstance();
+                paymentController.initiateRefund(bookingId);
+                
+                // Inform customer
+                // In a real application, this would send an email or notification
+                System.out.println("Refund initiated for booking: " + bookingId);
+            }
+            
+            return cancelled;
         }
         return false;
     }
@@ -78,6 +94,16 @@ public class BookingController {
                 .filter(b -> b.getBookingId().equals(bookingId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<Booking> getBookingsForFlight(String flightId) {
+        List<Booking> flightBookings = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if (booking.getFlight().getFlightId().equals(flightId)) {
+                flightBookings.add(booking);
+            }
+        }
+        return flightBookings;
     }
     
     public List<Booking> getBookingHistory(Customer customer) {

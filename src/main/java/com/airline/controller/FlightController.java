@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.airline.model.BookingStatus;
+import com.airline.model.FlightStatus;
+import com.airline.model.PaymentStatus;
+import com.airline.controller.BookingController;
+import java.util.List;
 
 // Uses Singleton pattern
 public class FlightController {
@@ -51,13 +56,47 @@ public class FlightController {
                 .orElse(null);
     }
     
-    public boolean updateFlightStatus(String flightId, FlightStatus status) {
+        // Find the existing updateFlightStatus method and replace it with this version
+    public boolean updateFlightStatus(String flightId, FlightStatus newStatus) {
         Flight flight = getFlightDetails(flightId);
         if (flight != null) {
-            flight.setStatus(status);
+            FlightStatus oldStatus = flight.getStatus();
+            flight.setStatus(newStatus);
+            
+            // Notify customers about the status change
+            if (oldStatus != newStatus) {
+                notifyCustomersAboutStatusChange(flight, oldStatus, newStatus);
+            }
+            
             return true;
         }
         return false;
+    }
+    
+    // Add this new private method after the updateFlightStatus method
+    private void notifyCustomersAboutStatusChange(Flight flight, FlightStatus oldStatus, FlightStatus newStatus) {
+        // Get all bookings for this flight
+        BookingController bookingController = BookingController.getInstance();
+        List<Booking> affectedBookings = bookingController.getBookingsForFlight(flight.getFlightId());
+        
+        // In a real app, this would send notifications/emails to customers
+        for (Booking booking : affectedBookings) {
+            System.out.println("Notifying customer " + booking.getCustomer().getUsername() + 
+                              " about flight " + flight.getFlightNumber() + 
+                              " status change from " + oldStatus + " to " + newStatus);
+            
+            // If flight is cancelled, process refunds
+            if (newStatus == FlightStatus.CANCELLED && 
+                booking.getStatus() != BookingStatus.CANCELLED && 
+                booking.getPaymentStatus() == PaymentStatus.COMPLETED) {
+                
+                // Cancel booking and initiate refund
+                bookingController.cancelBooking(booking.getBookingId());
+                
+                // Show alert to user if they're currently logged in (in a real app)
+                System.out.println("Flight cancelled: Refund initiated for booking " + booking.getBookingId());
+            }
+        }
     }
     
     public Map<SeatCategory, Integer> getAvailableSeats(Flight flight) {

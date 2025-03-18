@@ -1,6 +1,12 @@
 package com.airline.view;
 
+import java.util.List;
+
+import com.airline.controller.EnquiryController;
 import com.airline.model.Customer;
+import com.airline.model.Enquiry;
+import com.airline.model.EnquiryStatus;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -131,11 +137,27 @@ public class GeneralEnquiryView {
                 return;
             }
             
-            // In a real app, this would send the enquiry to the backend
-            showAlert("Enquiry Submitted", "Your enquiry has been submitted successfully. Our team will respond within 24 hours.", Alert.AlertType.INFORMATION);
+            // Submit the enquiry using the controller
+            EnquiryController enquiryController = EnquiryController.getInstance();
+            boolean success = enquiryController.submitEnquiry(
+                customer, 
+                subjectCombo.getValue(), 
+                messageArea.getText()
+            );
             
-            // Clear the form
-            messageArea.clear();
+            if (success) {
+                showAlert("Enquiry Submitted", 
+                        "Your enquiry has been submitted successfully. Our team will respond within 24 hours.", 
+                        Alert.AlertType.INFORMATION);
+                
+                // Clear the form
+                messageArea.clear();
+                
+                // Show the user's enquiries including this new one
+                showUserEnquiries();
+            } else {
+                showAlert("Submission Error", "Failed to submit your enquiry. Please try again.");
+            }
         });
         
         contactForm.add(submitButton, 1, 6);
@@ -154,9 +176,87 @@ public class GeneralEnquiryView {
         
         contactInfo.getChildren().addAll(contactInfoTitle, phone, email, hours);
         
-        centerContent.getChildren().addAll(faqsPane, contactForm, contactInfo);
+        // Add a section to view previous enquiries and their responses
+        TitledPane previousEnquiriesPane = new TitledPane();
+        previousEnquiriesPane.setText("Your Previous Enquiries");
+        
+        VBox enquiriesBox = new VBox(10);
+        enquiriesBox.setPadding(new Insets(10));
+        
+        // This will load and display the user's previous enquiries
+        showUserEnquiriesInBox(enquiriesBox);
+        
+        previousEnquiriesPane.setContent(enquiriesBox);
+        previousEnquiriesPane.setExpanded(true);
+        
+        // Add all components to centerContent once
+        centerContent.getChildren().addAll(faqsPane, contactForm, contactInfo, previousEnquiriesPane);
         view.setCenter(new ScrollPane(centerContent));
     }
+
+    private void showUserEnquiriesInBox(VBox container) {
+    EnquiryController enquiryController = EnquiryController.getInstance();
+    List<Enquiry> userEnquiries = enquiryController.getCustomerEnquiries(customer);
+    
+    if (userEnquiries.isEmpty()) {
+        container.getChildren().add(new Label("You have no previous enquiries."));
+        return;
+    }
+    
+    for (Enquiry enquiry : userEnquiries) {
+        TitledPane enquiryPane = new TitledPane();
+        enquiryPane.setText(enquiry.getSubject() + " (" + enquiry.getStatus() + ")");
+        
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(10));
+        
+        content.getChildren().add(new Label("Submitted on: " + enquiry.getSubmissionDate().toString()));
+        content.getChildren().add(new Label("Message:"));
+        
+        TextArea messageArea = new TextArea(enquiry.getMessage());
+        messageArea.setEditable(false);
+        messageArea.setPrefRowCount(3);
+        messageArea.setWrapText(true);
+        content.getChildren().add(messageArea);
+        
+        if (enquiry.getStatus() == EnquiryStatus.RESOLVED && enquiry.getResponse() != null) {
+            content.getChildren().add(new Label("Response:"));
+            
+            TextArea responseArea = new TextArea(enquiry.getResponse());
+            responseArea.setEditable(false);
+            responseArea.setPrefRowCount(3);
+            responseArea.setWrapText(true);
+            content.getChildren().add(responseArea);
+            
+            content.getChildren().add(new Label("Responded on: " + enquiry.getResponseDate().toString()));
+        } else {
+            content.getChildren().add(new Label("Status: Awaiting Response"));
+        }
+        
+        enquiryPane.setContent(content);
+        container.getChildren().add(enquiryPane);
+    }
+}
+
+private void showUserEnquiries() {
+    VBox centerContent = (VBox) ((ScrollPane) view.getCenter()).getContent();
+    
+    // Find the previous enquiries pane
+    for (int i = 0; i < centerContent.getChildren().size(); i++) {
+        if (centerContent.getChildren().get(i) instanceof TitledPane &&
+            ((TitledPane) centerContent.getChildren().get(i)).getText().equals("Your Previous Enquiries")) {
+            
+            TitledPane enquiriesPane = (TitledPane) centerContent.getChildren().get(i);
+            VBox enquiriesBox = new VBox(10);
+            enquiriesBox.setPadding(new Insets(10));
+            
+            showUserEnquiriesInBox(enquiriesBox);
+            
+            enquiriesPane.setContent(enquiriesBox);
+            break;
+        }
+    }
+}
     
     private void addFAQ(VBox container, String question, String answer) {
         Accordion faqItem = new Accordion();

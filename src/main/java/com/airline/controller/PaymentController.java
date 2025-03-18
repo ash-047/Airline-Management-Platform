@@ -58,18 +58,16 @@ public class PaymentController {
     }
     
     public boolean initiateRefund(String bookingId) {
-        // Find the booking
         BookingController bookingController = BookingController.getInstance();
         Booking booking = bookingController.getBookingDetails(bookingId);
         
-        if (booking != null) {
-            // Find the associated payment
-            Payment payment = payments.stream()
-                    .filter(p -> p.getBooking().getBookingId().equals(bookingId))
-                    .findFirst()
-                    .orElse(null);
-            
-            if (payment != null && payment.getStatus() == PaymentStatus.COMPLETED) {
+        if (booking == null || booking.getPaymentStatus() != PaymentStatus.COMPLETED) {
+            return false;
+        }
+        
+        // Find the payment for this booking
+        for (Payment payment : payments) {
+            if (payment.getBooking().getBookingId().equals(bookingId)) {
                 return payment.refundPayment();
             }
         }
