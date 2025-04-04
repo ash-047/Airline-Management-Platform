@@ -100,7 +100,7 @@ public class LoginView {
         
         grid.add(buttons, 1, 2);
         
-        // Add demo account information for testing
+        // add demo account information for testing
         Text demoInfo = new Text("Demo Accounts:\nCustomer - username: user, password: password\nAdmin - username: admin, password: admin123");
         demoInfo.setFont(Font.font("Arial", 12));
         

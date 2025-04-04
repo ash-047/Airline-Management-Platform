@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.control.ComboBox;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -62,17 +63,27 @@ public class FlightSearchView {
         searchForm.add(sourceLabel, 0, 0);
         
         // For demo purposes, using TextField instead of a proper dropdown
-        TextField sourceField = new TextField();
-        sourceField.setPromptText("Airport code (e.g., JFK)");
-        searchForm.add(sourceField, 1, 0);
+        ComboBox<String> sourceCombo = new ComboBox<>();
+        sourceCombo.setPromptText("Select departure airport");
+        sourceCombo.setEditable(true); // Allow custom input
+        sourceCombo.getItems().addAll(
+            "JFK", "LAX", "ORD", "ATL", "LHR", "CDG", "DXB", "SIN", "HND", "SYD"
+        );
+        sourceCombo.setPrefWidth(200);
+        searchForm.add(sourceCombo, 1, 0);
         
         Label destLabel = new Label("To:");
         searchForm.add(destLabel, 0, 1);
         
         // For demo purposes, using TextField instead of a proper dropdown
-        TextField destField = new TextField();
-        destField.setPromptText("Airport code (e.g., LAX)");
-        searchForm.add(destField, 1, 1);
+        ComboBox<String> destCombo = new ComboBox<>();
+        destCombo.setPromptText("Select arrival airport");
+        destCombo.setEditable(true); // Allow custom input
+        destCombo.getItems().addAll(
+            "JFK", "LAX", "ORD", "ATL", "LHR", "CDG", "DXB", "SIN", "HND", "SYD"
+        );
+        destCombo.setPrefWidth(200);
+        searchForm.add(destCombo, 1, 1);
         
         Label dateLabel = new Label("Departure Date:");
         searchForm.add(dateLabel, 0, 2);
@@ -83,16 +94,18 @@ public class FlightSearchView {
         
         Button searchButton = new Button("Search Flights");
         searchButton.setOnAction(e -> {
-            String source = sourceField.getText().trim().toUpperCase();
-            String destination = destField.getText().trim().toUpperCase();
+            String source = sourceCombo.getValue();
+            String destination = destCombo.getValue();
             LocalDate date = datePicker.getValue();
             
-            if (source.isEmpty() || destination.isEmpty() || date == null) {
+            if (source == null || source.trim().isEmpty() || 
+                destination == null || destination.trim().isEmpty() || 
+                date == null) {
                 showAlert("Search Error", "Please fill in all search fields.");
                 return;
             }
             
-            searchFlights(source, destination, date);
+            searchFlights(source.trim().toUpperCase(), destination.trim().toUpperCase(), date);
         });
         
         searchForm.add(searchButton, 1, 3);

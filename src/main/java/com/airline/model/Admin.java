@@ -18,16 +18,13 @@ public class Admin extends User {
     }
     
     public Report generateReports() {
-        // Generate system reports
         return new Report();
     }
     
     public boolean provideFlightUpdates(Flight flight, String update) {
-        // Update flight status and notify customers
         return true;
     }
     
-    // Getters and Setters
     public String getAdminRole() {
         return adminRole;
     }

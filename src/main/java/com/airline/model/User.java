@@ -14,26 +14,21 @@ public abstract class User {
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
-    
-    // Default constructor for database operations
     public User() {}
     
     public boolean login() {
-        // Authentication logic would go here
         return true;
     }
     
     public boolean register() {
-        // Registration logic would go here
         return true;
     }
     
     public boolean updateProfile() {
-        // Profile update logic would go here
+        // profile update logic would go here
         return true;
     }
     
-    // Getters and Setters
     public String getUserId() {
         return userId;
     }
