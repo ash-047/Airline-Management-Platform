@@ -76,7 +76,7 @@
                                 <td th:text="${#temporals.format(booking.flight.departureTime, 'dd MMM yyyy HH:mm')}"></td>
                                 <td th:text="${booking.seatClass}"></td>
                                 <td th:text="${booking.passengers.size()}"></td>
-                                <td th:text="${'$' + booking.totalPrice}"></td>
+                                <td th:text="${'₹' + booking.totalPrice}"></td>
                                 <td>
                                     <span th:class="${booking.status == T(com.airline.management.model.Booking.BookingStatus).CONFIRMED ? 'badge bg-success' : 
                                              (booking.status == T(com.airline.management.model.Booking.BookingStatus).CANCELLED ? 'badge bg-danger' : 'badge bg-warning')}" 

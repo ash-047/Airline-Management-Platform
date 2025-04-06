@@ -110,9 +110,9 @@
                                                   (flight.status == T(com.airline.management.model.Flight.FlightStatus).DELAYED ? 'badge bg-warning' : 'badge bg-success')}" 
                                           th:text="${flight.status}"></span>
                                 </td>
-                                <td th:text="${'$' + flight.economyPrice}"></td>
-                                <td th:text="${'$' + flight.businessPrice}"></td>
-                                <td th:text="${'$' + flight.firstClassPrice}"></td>
+                                <td th:text="${'₹' + flight.economyPrice}"></td>
+                                <td th:text="${'₹' + flight.businessPrice}"></td>
+                                <td th:text="${'₹' + flight.firstClassPrice}"></td>
                                 <td>
                                     <a th:if="${flight.status != T(com.airline.management.model.Flight.FlightStatus).CANCELLED}"
                                        th:href="@{/user/book/{id}(id=${flight.id})}" 

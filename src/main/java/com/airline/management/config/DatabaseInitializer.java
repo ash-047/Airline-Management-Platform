@@ -69,9 +69,9 @@ public class DatabaseInitializer implements CommandLineRunner {
                 flight.setArrivalTime(departure.plusHours(5 + i));
                 
                 // Set default prices
-                flight.setEconomyPrice(200.0 + (i * 50));
-                flight.setBusinessPrice(500.0 + (i * 100));
-                flight.setFirstClassPrice(1000.0 + (i * 200));
+                flight.setEconomyPrice(10000.0 + (i * 2000));
+                flight.setBusinessPrice(25000.0 + (i * 5000));
+                flight.setFirstClassPrice(50000.0 + (i * 10000));
                 
                 flightService.saveFlight(flight);
             }

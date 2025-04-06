@@ -11,6 +11,10 @@ public interface FlightService {
     Flight findById(Long id);
     List<Flight> findAll();
     List<Flight> findBySourceAndDestinationAndDate(String source, String destination, LocalDateTime date);
+
+    List<String> findAllSources();
+    List<String> findAllDestinations();
+
     void updateFlightStatus(Long flightId, Flight.FlightStatus status);
     boolean existsByFlightNumber(String flightNumber);
 

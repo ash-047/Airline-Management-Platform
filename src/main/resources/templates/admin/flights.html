@@ -79,9 +79,9 @@
                                               (flight.status == T(com.airline.management.model.Flight.FlightStatus).DELAYED ? 'badge bg-warning' : 'badge bg-success')}" 
                                           th:text="${flight.status}"></span>
                                 </td>
-                                <td th:text="${flight.economySeats + ' ($' + flight.economyPrice + ')'}"></td>
-                                <td th:text="${flight.businessSeats + ' ($' + flight.businessPrice + ')'}"></td>
-                                <td th:text="${flight.firstClassSeats + ' ($' + flight.firstClassPrice + ')'}"></td>
+                                <td th:text="${flight.economySeats + ' (₹' + flight.economyPrice + ')'}"></td>
+                                <td th:text="${flight.businessSeats + ' (₹' + flight.businessPrice + ')'}"></td>
+                                <td th:text="${flight.firstClassSeats + ' (₹' + flight.firstClassPrice + ')'}"></td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -192,16 +192,16 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="economyPrice" class="form-label">Economy Price ($)</label>
-                                <input type="number" step="0.01" class="form-control" id="economyPrice" name="economyPrice" value="200.00" required>
+                                <label for="economyPrice" class="form-label">Economy Price (₹)</label>
+                                <input type="number" step="0.01" class="form-control" id="economyPrice" name="economyPrice" value="5000.00" required>
                             </div>
                             <div class="col-md-4">
-                                <label for="businessPrice" class="form-label">Business Price ($)</label>
-                                <input type="number" step="0.01" class="form-control" id="businessPrice" name="businessPrice" value="500.00" required>
+                                <label for="businessPrice" class="form-label">Business Price (₹)</label>
+                                <input type="number" step="0.01" class="form-control" id="businessPrice" name="businessPrice" value="8000.00" required>
                             </div>
                             <div class="col-md-4">
-                                <label for="firstClassPrice" class="form-label">First Class Price ($)</label>
-                                <input type="number" step="0.01" class="form-control" id="firstClassPrice" name="firstClassPrice" value="1000.00" required>
+                                <label for="firstClassPrice" class="form-label">First Class Price (₹)</label>
+                                <input type="number" step="0.01" class="form-control" id="firstClassPrice" name="firstClassPrice" value="10000.00" required>
                             </div>
                         </div>
                         <div class="d-grid">

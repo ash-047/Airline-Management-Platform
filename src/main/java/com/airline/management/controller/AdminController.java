@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.time.format.DateTimeFormatter;
 
 import java.time.LocalDateTime;
 
@@ -21,8 +22,8 @@ public class AdminController {
             @RequestParam String flightNumber,
             @RequestParam String source, 
             @RequestParam String destination,
-            @RequestParam LocalDateTime departureTime,
-            @RequestParam LocalDateTime arrivalTime,
+            @RequestParam String departureTime,
+            @RequestParam String arrivalTime,
             @RequestParam Flight.FlightStatus status,
             @RequestParam int economySeats,
             @RequestParam int businessSeats,
@@ -36,8 +37,11 @@ public class AdminController {
             flight.setFlightNumber(flightNumber);
             flight.setSource(source);
             flight.setDestination(destination);
-            flight.setDepartureTime(departureTime);
-            flight.setArrivalTime(arrivalTime);
+            // flight.setDepartureTime(departureTime);
+            // flight.setArrivalTime(arrivalTime);
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            flight.setDepartureTime(LocalDateTime.parse(departureTime, formatter));
+            flight.setArrivalTime(LocalDateTime.parse(arrivalTime, formatter));
             flight.setStatus(status);
             flight.setEconomySeats(economySeats);
             flight.setBusinessSeats(businessSeats);
@@ -48,10 +52,11 @@ public class AdminController {
             
             flightService.createFlight(flight);
             redirectAttributes.addFlashAttribute("success", "Flight added successfully");
-            return "redirect:/admin/flights";
+            // return "redirect:/admin/flights";
         } catch (Exception e) {
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error adding flight: " + e.getMessage());
-            return "redirect:/admin/flights";
         }
+        return "redirect:/admin/flights";
     }
 }

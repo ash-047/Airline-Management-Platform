@@ -6,6 +6,8 @@ import com.airline.management.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -87,4 +89,23 @@ public class FlightServiceImpl implements FlightService {
         
         return flightRepository.save(flight);
     }
+
+        @Override
+    public List<String> findAllSources() {
+        return flightRepository.findAll().stream()
+                .map(Flight::getSource)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<String> findAllDestinations() {
+        return flightRepository.findAll().stream()
+                .map(Flight::getDestination)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
 }
