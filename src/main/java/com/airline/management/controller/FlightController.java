@@ -24,38 +24,6 @@ public class FlightController {
         this.flightService = flightService;
     }
 
-    // @GetMapping("/user/search-flights")
-    // public String searchFlightsPage(Model model) {
-    //     model.addAttribute("sources", new String[]{"New York", "London", "Tokyo", "Dubai", "Paris"});
-    //     model.addAttribute("destinations", new String[]{"Los Angeles", "Singapore", "Sydney", "Mumbai", "Toronto"});
-    //     return "user/search-flights";
-    // }
-
-
-    // @PostMapping("/user/search-flights")
-    // public String searchFlights(
-    //         @RequestParam String source,
-    //         @RequestParam String destination,
-    //         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-    //         Model model) {
-        
-    //     // Convert LocalDate to LocalDateTime (start of day)
-    //     LocalDateTime dateTime = date.atStartOfDay();
-        
-    //     List<Flight> flights = flightService.findBySourceAndDestinationAndDate(source, destination, dateTime);
-        
-    //     model.addAttribute("flights", flights);
-    //     model.addAttribute("source", source);
-    //     model.addAttribute("destination", destination);
-    //     model.addAttribute("date", date);
-        
-    //     // Keep the dropdown data
-    //     model.addAttribute("sources", new String[]{"New York", "London", "Tokyo", "Dubai", "Paris"});
-    //     model.addAttribute("destinations", new String[]{"Los Angeles", "Singapore", "Sydney", "Mumbai", "Toronto"});
-        
-    //     return "user/search-flights";
-    // }
-
     @GetMapping("/user/search-flights")
 public String showSearchFlights(Model model) {
     // Get all unique sources and destinations from the database
