@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Flight - Airline Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Airline Management System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/user/dashboard}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/user/search-flights}">Search Flights</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/user/bookings}">My Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/user/enquiries}">Enquiries</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-outline-light">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <h2 class="mb-4">Book Flight</h2>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Flight Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 150px;">Flight Number:</th>
+                                    <td th:text="${flight.flightNumber}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Route:</th>
+                                    <td th:text="${flight.source + ' → ' + flight.destination}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Departure:</th>
+                                    <td th:text="${#temporals.format(flight.departureTime, 'dd MMM yyyy HH:mm')}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Arrival:</th>
+                                    <td th:text="${#temporals.format(flight.arrivalTime, 'dd MMM yyyy HH:mm')}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span th:class="${flight.status == T(com.airline.management.model.Flight.FlightStatus).CANCELLED ? 'badge bg-danger' : 
+                                                      (flight.status == T(com.airline.management.model.Flight.FlightStatus).DELAYED ? 'badge bg-warning' : 'badge bg-success')}" 
+                                              th:text="${flight.status}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="table-primary">
+                                    <th>Class</th>
+                                    <th>Price</th>
+                                    <th>Available Seats</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Economy</td>
+                                    <td th:text="${'₹' + flight.economyPrice}"></td>
+                                    <td th:text="${flight.economySeats}"></td>
+                                </tr>
+                                <tr>
+                                    <td>Business</td>
+                                    <td th:text="${'₹' + flight.businessPrice}"></td>
+                                    <td th:text="${flight.businessSeats}"></td>
+                                </tr>
+                                <tr>
+                                    <td>First Class</td>
+                                    <td th:text="${'₹' + flight.firstClassPrice}"></td>
+                                    <td th:text="${flight.firstClassSeats}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form th:action="@{/user/book/complete}" method="post" id="bookingForm">
+            <input type="hidden" name="flightId" th:value="${flight.id}">
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Booking Options</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="seatClass" class="form-label">Select Class</label>
+                            <select class="form-select" id="seatClass" name="seatClass" required onchange="updatePrice()">
+                                <option value="" selected disabled>Choose a class</option>
+                                <option th:each="seatClass : ${seatClasses}" th:value="${seatClass}" th:text="${seatClass}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="passengerCount" class="form-label">Number of Passengers</label>
+                            <select class="form-select" id="passengerCount" name="passengerCount" required onchange="updatePassengerFields(); updatePrice()">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span>Total Price:</span>
+                                <strong id="totalPrice">₹0.00</strong>
+                                <small>(including taxes)</small>
+                            </div>
+                            <div>
+                                <span>Base Price:</span>
+                                <span id="basePrice">₹0.00</span>
+                                <span> + Tax:</span>
+                                <span id="taxAmount">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Passenger Information</h5>
+                </div>
+                <div class="card-body">
+                    <div id="passengersContainer">
+                        <!-- Passenger 1 (always present) -->
+                        <div class="card mb-3 passenger-card" data-passenger-index="0">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Passenger #1</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="passenger-name-0" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="passenger-name-0" name="passengerName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="passenger-age-0" class="form-label">Age</label>
+                                        <input type="number" class="form-control" id="passenger-age-0" name="passengerAge" min="0" max="120" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="passenger-id-type-0" class="form-label">ID Type</label>
+                                        <select class="form-select" id="passenger-id-type-0" name="passengerIdType" required>
+                                            <option value="" selected disabled>Select ID Type</option>
+                                            <option value="Passport">Passport</option>
+                                            <option value="Driving License">Driving License</option>
+                                            <option value="National ID">National ID</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="passenger-id-number-0" class="form-label">ID Number</label>
+                                        <input type="text" class="form-control" id="passenger-id-number-0" name="passengerIdNumber" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="passenger-seat-0" class="form-label">Seat Preference</label>
+                                        <select class="form-select" id="passenger-seat-0" name="passengerSeatNumber">
+                                            <option value="Window">Window</option>
+                                            <option value="Middle">Middle</option>
+                                            <option value="Aisle">Aisle</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional passengers will be generated dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Payment Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="paymentMethod" class="form-label">Payment Method</label>
+                        <select class="form-select" id="paymentMethod" name="paymentMethod" required onchange="toggleCardFields()">
+                            <option value="" selected disabled>Select Payment Method</option>
+                            <option th:each="method : ${paymentMethods}" th:value="${method}" th:text="${method}"></option>
+                        </select>
+                    </div>
+                    
+                    <div id="cardFields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Card Number</label>
+                            <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="cardHolder" class="form-label">Card Holder Name</label>
+                                <input type="text" class="form-control" id="cardHolder" name="cardHolder">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="expiryDate" class="form-label">Expiry Date</label>
+                                <input type="text" class="form-control" id="expiryDate" name="expiryDate" placeholder="MM/YY">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="password" class="form-control" id="cvv" name="cvv" placeholder="XXX">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="netBankingFields" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill"></i> For demo purposes, no additional information is required for Net Banking payments.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mb-4">
+                <a th:href="@{/user/search-flights}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Flight Search
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Complete Booking <i class="bi bi-check-circle"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Store flight prices as global variables for price calculation
+        const economyPrice = /*[[${flight.economyPrice}]]*/ 5000;
+        const businessPrice = /*[[${flight.businessPrice}]]*/ 8000;
+        const firstClassPrice = /*[[${flight.firstClassPrice}]]*/ 10000;
+        
+        function updatePassengerFields() {
+            const passengerCount = parseInt(document.getElementById('passengerCount').value) || 1;
+            const container = document.getElementById('passengersContainer');
+            
+            // Keep the first passenger card
+            const existingCards = container.querySelectorAll('.passenger-card');
+            for (let i = 1; i < existingCards.length; i++) {
+                container.removeChild(existingCards[i]);
+            }
+            
+            // Add cards for additional passengers
+            for (let i = 1; i < passengerCount; i++) {
+                const passengerCard = document.createElement('div');
+                passengerCard.className = 'card mb-3 passenger-card';
+                passengerCard.dataset.passengerIndex = i;
+                
+                passengerCard.innerHTML = `
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Passenger #${i + 1}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="passenger-name-${i}" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="passenger-name-${i}" name="passengerName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="passenger-age-${i}" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="passenger-age-${i}" name="passengerAge" min="0" max="120" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="passenger-id-type-${i}" class="form-label">ID Type</label>
+                                <select class="form-select" id="passenger-id-type-${i}" name="passengerIdType" required>
+                                    <option value="" selected disabled>Select ID Type</option>
+                                    <option value="Passport">Passport</option>
+                                    <option value="Driving License">Driving License</option>
+                                    <option value="National ID">National ID</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="passenger-id-number-${i}" class="form-label">ID Number</label>
+                                <input type="text" class="form-control" id="passenger-id-number-${i}" name="passengerIdNumber" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="passenger-seat-${i}" class="form-label">Seat Preference</label>
+                                <select class="form-select" id="passenger-seat-${i}" name="passengerSeatNumber">
+                                    <option value="Window">Window</option>
+                                    <option value="Middle">Middle</option>
+                                    <option value="Aisle">Aisle</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(passengerCard);
+            }
+        }
+        
+        function updatePrice() {
+            const seatClass = document.getElementById('seatClass').value;
+            const passengerCount = parseInt(document.getElementById('passengerCount').value) || 1;
+            let basePrice = 0;
+            
+            if (seatClass === 'ECONOMY') {
+                basePrice = economyPrice;
+            } else if (seatClass === 'BUSINESS') {
+                basePrice = businessPrice;
+            } else if (seatClass === 'FIRST_CLASS') {
+                basePrice = firstClassPrice;
+            }
+            
+            const totalBasePrice = basePrice * passengerCount;
+            const tax = totalBasePrice * 0.1; // 10% tax
+            const totalPrice = totalBasePrice + tax;
+            
+            document.getElementById('basePrice').textContent = '₹' + totalBasePrice.toFixed(2);
+            document.getElementById('taxAmount').textContent = '₹' + tax.toFixed(2);
+            document.getElementById('totalPrice').textContent = '₹' + totalPrice.toFixed(2);
+        }
+        
+        function toggleCardFields() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const cardFields = document.getElementById('cardFields');
+            const netBankingFields = document.getElementById('netBankingFields');
+            
+            if (paymentMethod === 'CREDIT_CARD' || paymentMethod === 'DEBIT_CARD') {
+                cardFields.style.display = 'block';
+                netBankingFields.style.display = 'none';
+                
+                // Make card fields required
+                document.getElementById('cardNumber').required = true;
+                document.getElementById('cardHolder').required = true;
+                document.getElementById('expiryDate').required = true;
+                document.getElementById('cvv').required = true;
+            } else if (paymentMethod === 'NET_BANKING') {
+                cardFields.style.display = 'none';
+                netBankingFields.style.display = 'block';
+                
+                // Make card fields not required
+                document.getElementById('cardNumber').required = false;
+                document.getElementById('cardHolder').required = false;
+                document.getElementById('expiryDate').required = false;
+                document.getElementById('cvv').required = false;
+            } else {
+                cardFields.style.display = 'none';
+                netBankingFields.style.display = 'none';
+            }
+        }
+        
+        // Form validation
+        document.getElementById('bookingForm').addEventListener('submit', function(event) {
+            const seatClass = document.getElementById('seatClass').value;
+            if (!seatClass) {
+                alert('Please select a travel class');
+                event.preventDefault();
+                return;
+            }
+            
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            if (!paymentMethod) {
+                alert('Please select a payment method');
+                event.preventDefault();
+                return;
+            }
+            
+            if (paymentMethod === 'CREDIT_CARD' || paymentMethod === 'DEBIT_CARD') {
+                const cardNumber = document.getElementById('cardNumber').value;
+                const cardHolder = document.getElementById('cardHolder').value;
+                const expiryDate = document.getElementById('expiryDate').value;
+                const cvv = document.getElementById('cvv').value;
+                
+                if (!cardNumber || !cardHolder || !expiryDate || !cvv) {
+                    alert('Please fill in all card details');
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Basic validation
+                if (cardNumber.replace(/\s/g, '').length < 16) {
+                    alert('Please enter a valid card number');
+                    event.preventDefault();
+                    return;
+                }
+                
+                if (!expiryDate.match(/^\d{2}\/\d{2}$/)) {
+                    alert('Please enter expiry date in MM/YY format');
+                    event.preventDefault();
+                    return;
+                }
+                
+                if (cvv.length < 3) {
+                    alert('Please enter a valid CVV');
+                    event.preventDefault();
+                    return;
+                }
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePrice();
+            updatePassengerFields();
+        });
+    </script>
+</body>
+</html>
