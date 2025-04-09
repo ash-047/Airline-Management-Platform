@@ -1,3 +1,4 @@
-.vscode/
+.gitignore
 target/
 sample.txt
+To_Do.txt
