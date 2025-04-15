@@ -24,7 +24,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Add admin user if it doesn't exist
+        // add admin user if it doesn't exist
         if (!userService.existsByUsername("admin")) {
             User admin = new User();
             admin.setUsername("admin");
@@ -35,7 +35,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             userService.registerUser(admin);
         }
         
-        // Add a regular user for testing
+        // add a regular user for testing
         if (!userService.existsByUsername("user")) {
             User user = new User();
             user.setUsername("user");
@@ -46,7 +46,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             userService.registerUser(user);
         }
         
-        // Add some sample flights
+        // add some sample flights
         addSampleFlights();
     }
     
@@ -61,14 +61,14 @@ public class DatabaseInitializer implements CommandLineRunner {
                 flight.setSource(sources[i]);
                 flight.setDestination(destinations[i]);
                 
-                // Set departure time to a future date
+                // set departure time to a future date
                 LocalDateTime departure = LocalDateTime.now().plusDays(i + 1).withHour(10).withMinute(0);
                 flight.setDepartureTime(departure);
                 
-                // Set arrival time based on a reasonable flight duration
+                // set arrival time based on a reasonable flight duration
                 flight.setArrivalTime(departure.plusHours(5 + i));
                 
-                // Set default prices
+                // set default prices
                 flight.setEconomyPrice(10000.0 + (i * 2000));
                 flight.setBusinessPrice(25000.0 + (i * 5000));
                 flight.setFirstClassPrice(50000.0 + (i * 10000));

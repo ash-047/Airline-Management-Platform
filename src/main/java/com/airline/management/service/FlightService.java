@@ -24,4 +24,10 @@ public interface FlightService {
      * @return The saved flight with assigned ID
      */
     Flight createFlight(Flight flight);
+
+    /**
+     * Deletes a flight by its id
+     * @param id The id of the flight to delete
+     */
+    void deleteFlight(Long id);
 }

@@ -13,4 +13,5 @@ public interface BookingService {
     Booking updateBookingStatus(Long bookingId, Booking.BookingStatus status);
     Booking cancelBooking(Long bookingId);
     double calculateTotalPrice(Long flightId, Booking.SeatClass seatClass, int passengerCount);
+    List<Booking> findRecentBookingsByUser(User user);
 }

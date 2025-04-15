@@ -9,7 +9,9 @@ import com.airline.management.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -69,6 +71,16 @@ public class BookingServiceImpl implements BookingService {
         }
         
         return bookingRepository.save(booking);
+    }
+
+    @Override
+    public List<Booking> findRecentBookingsByUser(User user) {
+        List<Booking> bookings = bookingRepository.findByUserOrderByBookingDateDesc(user);
+        LocalDateTime now = LocalDateTime.now();
+        return bookings.stream()
+            .filter(b -> b.getFlight().getDepartureTime().isAfter(now.minusDays(1)))
+            .limit(5)
+            .collect(Collectors.toList());
     }
 
     @Override

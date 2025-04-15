@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/register")
     public String registerUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
-            // Check if username or email already exists
+            // check if username or email already exists
             if (userService.existsByUsername(user.getUsername())) {
                 redirectAttributes.addFlashAttribute("error", "Username already exists");
                 return "redirect:/register";
@@ -45,10 +45,8 @@ public class AuthController {
                 return "redirect:/register";
             }
             
-            // Set default role to CUSTOMER
+            // set default role to CUSTOMER
             user.setRole(User.Role.CUSTOMER);
-            
-            // Register the user
             userService.registerUser(user);
             
             redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.");

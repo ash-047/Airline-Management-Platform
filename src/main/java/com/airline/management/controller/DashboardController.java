@@ -39,7 +39,6 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
-        // Redirect to appropriate dashboard based on user role
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             return "redirect:/admin/dashboard";
         } else {
@@ -51,11 +50,8 @@ public class DashboardController {
     public String userDashboard(Authentication authentication, Model model) {
         User user = userService.findByUsername(authentication.getName());
         
-        // Get recent bookings for the dashboard
-        List<Booking> recentBookings = bookingService.findByUser(user);
-        
-        // Get user's enquiries
         List<Enquiry> enquiries = enquiryService.findByUser(user);
+        List<Booking> recentBookings = bookingService.findRecentBookingsByUser(user);
         
         model.addAttribute("user", user);
         model.addAttribute("recentBookings", recentBookings);
@@ -66,10 +62,7 @@ public class DashboardController {
 
     @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model) {
-        // Get all flights for management
         List<Flight> flights = flightService.findAll();
-        
-        // Get pending enquiries that need responses
         List<Enquiry> pendingEnquiries = enquiryService.findPendingEnquiries();
         
         model.addAttribute("flights", flights);

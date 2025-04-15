@@ -94,6 +94,17 @@
                                                     Update Status
                                                 </button>
                                             </li>
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{/admin/flights/{id}/edit(id=${flight.id})}">
+                                                    Edit Flight
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#deleteFlightModal' + ${flight.id}">
+                                                    Delete Flight
+                                                </button>
+                                            </li>
                                         </ul>
                                     </div>
                                     
@@ -119,6 +130,26 @@
                                                         <div class="d-grid">
                                                             <button type="submit" class="btn btn-primary">Update Status</button>
                                                         </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal fade" th:id="'deleteFlightModal' + ${flight.id}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete flight <strong th:text="${flight.flightNumber}"></strong>?</p>
+                                                    <p class="text-danger">This action cannot be undone. All related bookings will be cancelled.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form th:action="@{/admin/flights/{id}/delete(id=${flight.id})}" method="post">
+                                                        <button type="submit" class="btn btn-danger">Delete Flight</button>
                                                     </form>
                                                 </div>
                                             </div>

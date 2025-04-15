@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,10 +77,10 @@ public class BookingController {
             User user = userService.findByUsername(authentication.getName());
             Flight flight = flightService.findById(flightId);
             
-            // Calculate total price
+            // calculate total price
             double totalPrice = bookingService.calculateTotalPrice(flightId, seatClass, passengerCount);
             
-            // Create a new booking
+            // create a new booking
             Booking booking = new Booking();
             booking.setUser(user);
             booking.setFlight(flight);
@@ -89,7 +88,7 @@ public class BookingController {
             booking.setTotalPrice(totalPrice);
             booking.setStatus(Booking.BookingStatus.PENDING);
             
-            // Add passengers to booking
+            // add passengers to booking
             List<Passenger> passengers = new ArrayList<>();
             for (int i = 0; i < passengerCount; i++) {
                 if (passengerName != null && i < passengerName.length) {
@@ -108,14 +107,14 @@ public class BookingController {
             // Save the booking
             Booking savedBooking = bookingService.createBooking(booking);
             
-            // Create a payment
+            // create a payment
             Payment payment = new Payment();
             payment.setBooking(savedBooking);
             payment.setAmount(totalPrice);
             payment.setPaymentMethod(paymentMethod);
             payment.setStatus(Payment.PaymentStatus.PENDING);
             
-            // Set card details if using card payment methods
+            // set card details if using card payment methods
             if (paymentMethod == Payment.PaymentMethod.CREDIT_CARD || 
                     paymentMethod == Payment.PaymentMethod.DEBIT_CARD) {
                 payment.setCardNumber(cardNumber);
@@ -124,7 +123,7 @@ public class BookingController {
                 payment.setCvv(cvv);
             }
             
-            // Process the payment
+            // process the payment
             Payment processedPayment = paymentService.processPayment(payment);
             
             if (processedPayment.getStatus() == Payment.PaymentStatus.COMPLETED) {
@@ -151,7 +150,7 @@ public class BookingController {
             User user = userService.findByUsername(authentication.getName());
             Booking booking = bookingService.findById(id);
             
-            // Make sure the booking belongs to the user
+            // make sure the booking belongs to the user
             if (!booking.getUser().getId().equals(user.getId())) {
                 redirectAttributes.addFlashAttribute("error", "You can only cancel your own bookings");
                 return "redirect:/user/bookings";
