@@ -18,10 +18,6 @@ public interface FlightService {
     void updateFlightStatus(Long flightId, Flight.FlightStatus status);
     boolean existsByFlightNumber(String flightNumber);
 
-    /**
-     * Creates a new flight in the system
-     * @param flight The flight to create
-     * @return The saved flight with assigned ID
-     */
     Flight createFlight(Flight flight);
+    void deleteFlight(Long id);
 }

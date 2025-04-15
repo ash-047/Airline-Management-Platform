@@ -11,4 +11,5 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserOrderByBookingDateDesc(User user);
     List<Booking> findByFlightId(Long flightId);
+    List<Booking> findByFlightIdAndStatusNot(Long flightId, Booking.BookingStatus status);
 }

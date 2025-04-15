@@ -108,6 +108,18 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div th:each="booking : ${recentBookings}" th:if="${booking.status == T(com.airline.management.model.Booking.BookingStatus).CONFIRMED && 
+                                booking.flight.status == T(com.airline.management.model.Flight.FlightStatus).CANCELLED}" 
+                            class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i> 
+                            Your flight <strong th:text="${booking.flight.flightNumber}"></strong> has been cancelled. Please check your email for details or contact customer support.
+                        </div>
+                        <div th:each="booking : ${recentBookings}" th:if="${booking.status == T(com.airline.management.model.Booking.BookingStatus).CONFIRMED && 
+                                booking.flight.status == T(com.airline.management.model.Flight.FlightStatus).DELAYED}" 
+                            class="alert alert-warning">
+                            <i class="bi bi-info-circle-fill"></i> 
+                            Your flight <strong th:text="${booking.flight.flightNumber}"></strong> has been delayed. Please check your email for updated departure information.
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,8 +1,11 @@
 package com.airline.management.service.impl;
 
+import com.airline.management.model.Booking;
 import com.airline.management.model.Flight;
+import com.airline.management.repository.BookingRepository;
 import com.airline.management.repository.FlightRepository;
 import com.airline.management.service.FlightService;
+import com.airline.management.util.NotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +18,16 @@ import java.util.List;
 public class FlightServiceImpl implements FlightService {
 
     private final FlightRepository flightRepository;
+    private final BookingRepository bookingRepository;
+    private final NotificationManager notificationManager;
 
     @Autowired
-    public FlightServiceImpl(FlightRepository flightRepository) {
+    public FlightServiceImpl(FlightRepository flightRepository, 
+                            BookingRepository bookingRepository,
+                            NotificationManager notificationManager) {
         this.flightRepository = flightRepository;
+        this.bookingRepository = bookingRepository;
+        this.notificationManager = notificationManager;
     }
 
     @Override
@@ -62,12 +71,27 @@ public class FlightServiceImpl implements FlightService {
     @Override
     public void updateFlightStatus(Long flightId, Flight.FlightStatus status) {
         Flight flight = findById(flightId);
+        Flight.FlightStatus oldStatus = flight.getStatus();
         flight.setStatus(status);
         flightRepository.save(flight);
-        
-        // If flight is cancelled, we would handle affected bookings here
         if (status == Flight.FlightStatus.CANCELLED) {
-            // In a full implementation, we would notify affected customers and process refunds
+            List<Booking> affectedBookings = bookingRepository.findByFlightIdAndStatusNot(
+                flightId, Booking.BookingStatus.CANCELLED);
+            for (Booking booking : affectedBookings) {
+                booking.setStatus(Booking.BookingStatus.CANCELLED);
+                bookingRepository.save(booking);
+                if (booking.getUser() != null && booking.getUser().getEmail() != null) {
+                    notificationManager.notifyBookingCancellation(booking.getId(), booking.getUser().getEmail());
+                }
+            }
+        } else if (oldStatus != status) {
+            List<Booking> activeBookings = bookingRepository.findByFlightIdAndStatusNot(
+                flightId, Booking.BookingStatus.CANCELLED);
+            for (Booking booking : activeBookings) {
+                if (booking.getUser() != null && booking.getUser().getEmail() != null) {
+                    notificationManager.notifyFlightStatusChange(flightId, status.toString());
+                }
+            }
         }
     }
 
@@ -90,22 +114,33 @@ public class FlightServiceImpl implements FlightService {
         return flightRepository.save(flight);
     }
 
-        @Override
-    public List<String> findAllSources() {
-        return flightRepository.findAll().stream()
-                .map(Flight::getSource)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
-    }
-    
     @Override
-    public List<String> findAllDestinations() {
-        return flightRepository.findAll().stream()
-                .map(Flight::getDestination)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
+    public List<String> findAllSources() {
+        return flightRepository.findDistinctSources();
     }
 
+    @Override
+    public List<String> findAllDestinations() {
+        return flightRepository.findDistinctDestinations();
+    }
+
+    @Override
+    public void deleteFlight(Long id) {
+        Flight flight = findById(id);
+        if (flight.getBookings() != null && !flight.getBookings().isEmpty()) {
+            List<Booking> activeBookings = flight.getBookings().stream()
+                    .filter(b -> b.getStatus() != Booking.BookingStatus.CANCELLED)
+                    .collect(Collectors.toList());
+            if (!activeBookings.isEmpty()) {
+                for (Booking booking : activeBookings) {
+                    booking.setStatus(Booking.BookingStatus.CANCELLED);
+                    bookingRepository.save(booking);
+                    if (booking.getUser() != null && booking.getUser().getEmail() != null) {
+                        notificationManager.notifyBookingCancellation(booking.getId(), booking.getUser().getEmail());
+                    }
+                }
+            }
+        }
+        flightRepository.deleteById(id);
+    }
 }

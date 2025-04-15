@@ -15,18 +15,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 public class BookingController {
-
     private final BookingService bookingService;
     private final FlightService flightService;
     private final UserService userService;
     private final PaymentService paymentService;
-
+    
     @Autowired
     public BookingController(
             BookingService bookingService,
@@ -73,23 +71,16 @@ public class BookingController {
             @RequestParam(required = false) String cvv,
             Authentication authentication,
             RedirectAttributes redirectAttributes) {
-        
         try {
             User user = userService.findByUsername(authentication.getName());
             Flight flight = flightService.findById(flightId);
-            
-            // Calculate total price
             double totalPrice = bookingService.calculateTotalPrice(flightId, seatClass, passengerCount);
-            
-            // Create a new booking
             Booking booking = new Booking();
             booking.setUser(user);
             booking.setFlight(flight);
             booking.setSeatClass(seatClass);
             booking.setTotalPrice(totalPrice);
             booking.setStatus(Booking.BookingStatus.PENDING);
-            
-            // Add passengers to booking
             List<Passenger> passengers = new ArrayList<>();
             for (int i = 0; i < passengerCount; i++) {
                 if (passengerName != null && i < passengerName.length) {
@@ -104,18 +95,12 @@ public class BookingController {
                 }
             }
             booking.setPassengers(passengers);
-            
-            // Save the booking
             Booking savedBooking = bookingService.createBooking(booking);
-            
-            // Create a payment
             Payment payment = new Payment();
             payment.setBooking(savedBooking);
             payment.setAmount(totalPrice);
             payment.setPaymentMethod(paymentMethod);
             payment.setStatus(Payment.PaymentStatus.PENDING);
-            
-            // Set card details if using card payment methods
             if (paymentMethod == Payment.PaymentMethod.CREDIT_CARD || 
                     paymentMethod == Payment.PaymentMethod.DEBIT_CARD) {
                 payment.setCardNumber(cardNumber);
@@ -123,10 +108,7 @@ public class BookingController {
                 payment.setExpiryDate(expiryDate);
                 payment.setCvv(cvv);
             }
-            
-            // Process the payment
             Payment processedPayment = paymentService.processPayment(payment);
-            
             if (processedPayment.getStatus() == Payment.PaymentStatus.COMPLETED) {
                 redirectAttributes.addFlashAttribute("success", "Booking completed successfully. Your ticket is confirmed.");
                 return "redirect:/user/dashboard";
@@ -134,7 +116,6 @@ public class BookingController {
                 redirectAttributes.addFlashAttribute("error", "Payment failed");
                 return "redirect:/user/bookings";
             }
-            
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Booking error: " + e.getMessage());
             return "redirect:/user/search-flights";
@@ -146,23 +127,18 @@ public class BookingController {
             @PathVariable Long id,
             Authentication authentication,
             RedirectAttributes redirectAttributes) {
-        
         try {
             User user = userService.findByUsername(authentication.getName());
             Booking booking = bookingService.findById(id);
-            
-            // Make sure the booking belongs to the user
             if (!booking.getUser().getId().equals(user.getId())) {
                 redirectAttributes.addFlashAttribute("error", "You can only cancel your own bookings");
                 return "redirect:/user/bookings";
             }
-            
             bookingService.cancelBooking(id);
             redirectAttributes.addFlashAttribute("success", "Booking cancelled successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error cancelling booking: " + e.getMessage());
         }
-        
         return "redirect:/user/bookings";
     }
 
