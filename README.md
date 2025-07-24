@@ -63,3 +63,5 @@ components, making the system easier to maintain and extend with new features in
 - `src/main/java/com/airline/management/` - Java source code
 - `src/main/resources/templates/` - Thymeleaf HTML templates
 - `src/main/resources/application.properties` - Configuration
+
+---
