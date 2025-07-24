@@ -2,7 +2,7 @@
 
 ## Overview
 
-SkyServe is a comprehensive web-based platform designed to streamline flight operations for airlines and provide customers with an intuitive interface for flight-related 
+SkyServe is a comprehensive web-based airline management platform designed to streamline flight operations for airlines and provide customers with an intuitive interface for flight-related 
 activities. This project implements a full-stack solution that handles the complete booking 
 lifecycle - from flight search to ticket generation. 
 
